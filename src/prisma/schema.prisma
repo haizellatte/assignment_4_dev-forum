@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//* 사용자 정보
+model User {
+  id                Int      @id @default(autoincrement())
+  email             String   @unique
+  encryptedPassword String
+  createdAt         DateTime @default(now())
+  post              Post[]
+  like              Like[]
+}
+
+//* 게시판
+model Board {
+  id   Int    @id @default(autoincrement())
+  post Post[]
+}
+
+//* 게시글
+model Post {
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id])
+  userId    Int
+  board     Board     @relation(fields: [boardId], references: [id])
+  boardId   Int
+  comment   Comment[]
+  like      Like[]
+}
+
+//* 댓글
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+}
+
+//* 좋아요
+model Like {
+  id      Int     @id @default(autoincrement())
+  isLiked Boolean @default(false)
+  user    User    @relation(fields: [userId], references: [id])
+  userId  Int
+  post    Post    @relation(fields: [postId], references: [id])
+  postId  Int
+}
